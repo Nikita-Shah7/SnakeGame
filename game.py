@@ -43,10 +43,26 @@ while len(FOOD) < 6:
 pygame.display.update()
 
 SNAKE_LEN = 1
+SNAKE_LIST = []
+SNAKE_LIST.append((snake_x,snake_y))
+
+
+def plot_snake(gameWindow,snake_list):
+    for x,y in snake_list:
+        # print(f"({x},{y})",end="")
+        pygame.draw.rect(gameWindow,BLACK,(x,y,square_length,square_length))
+    # print()
+
+
+def game_over():
+    end = pygame.font.SysFont("verdana",square_length*4,bold=True,italic=False)
+    end = end.render("GAME OVER!!",True,RED,BLACK)
+    gameWindow.blit(end,((5*XLIM),(WINDOW_HEIGHT-3*YLIM)/2))
+    pygame.display.update()
+    time.sleep(2)    
 
 
 exit_game = False
-game_over = False
 
 # Creating a game loop
 while not exit_game:
@@ -70,11 +86,7 @@ while not exit_game:
     
     # Snake hits the walls
     if snake_x > WINDOW_WIDTH-5 or snake_y > WINDOW_HEIGHT-5 or snake_x < 1 or snake_y < 1 :
-        end = pygame.font.SysFont("verdana",square_length*4,bold=True,italic=False)
-        end = end.render("GAME OVER!!",True,RED,BLACK)
-        gameWindow.blit(end,((5*XLIM),(WINDOW_HEIGHT-3*YLIM)/2))
-        pygame.display.update()
-        time.sleep(2)
+        game_over()
         exit_game = True
     snake_x += velocity_x
     snake_x %= WINDOW_WIDTH
@@ -82,7 +94,6 @@ while not exit_game:
     snake_y %= WINDOW_HEIGHT
     pygame.display.update()
     
-
     gameWindow.fill(DULL_GOLD)
 
     # creating an off_screen_surface
@@ -100,12 +111,26 @@ while not exit_game:
         if abs(food_x - snake_x) < sensitivity and abs(food_y - snake_y) < sensitivity:
             FOOD.remove((food_x,food_y))
             SCORE += 1
+            SNAKE_LEN += square_length
             food_x = random.randint(XLIM,WINDOW_WIDTH-XLIM)
             food_y = random.randint(YLIM,WINDOW_HEIGHT-YLIM)
             FOOD.append((food_x,food_y))
             pygame.draw.rect(gameWindow,RED,(food_x,food_y,square_length,square_length))
             pygame.display.update()
             break
+    SNAKE_LIST.append((snake_x,snake_y))
+
+    if len(SNAKE_LIST) > SNAKE_LEN:
+        del SNAKE_LIST[0]
+
+    # increase length of snake but don't allow the snake to grow too long
+    if SNAKE_LEN < WINDOW_WIDTH/2:
+        plot_snake(gameWindow,SNAKE_LIST)
+
+    # snake hits itself
+    if (snake_x,snake_y) in SNAKE_LIST[:-1]:
+        game_over()
+        exit_game = True
     
     score = pygame.font.SysFont("verdana",square_length,bold=True,italic=False)
     score = score.render(f"SCORE: {str(SCORE)}",True,BLACK,DULL_GOLD)
