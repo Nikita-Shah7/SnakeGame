@@ -281,7 +281,7 @@ except (ImportError, OSError):
 try:
     import pygame.imageext
 
-    # del pygame.imageext  # this line is commented by Nikki
+    del pygame.imageext
 except (ImportError, OSError):
     pass
 
